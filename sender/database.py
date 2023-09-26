@@ -1,24 +1,21 @@
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession , async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from models import User, Base
 from schemas import UserSchema
+from sqlalchemy.orm import sessionmaker
 
 
-# Конфигурация подключения к базе данных
-# DATABASE_URL = "postgresql+asyncpg://postgres:9785@localhost:5432/postgres"
 
-# Создание асинхронного подключения к базе данных
-# async_engine = create_async_engine(DATABASE_URL, echo=True,future=True)
-# async_session = async_sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
+
+
 
 
 # Методы для работы с базой данных
-class Database:
-
+class Database():
    def __init__(self):
        self.database_url = "postgresql+asyncpg://postgres:9785@localhost:5432/postgres"
        self.async_engine = create_async_engine(self.database_url, echo=True, future=True)
-       self.async_session = async_sessionmaker(self.async_engine, class_=AsyncSession, expire_on_commit=False)
+       self.async_session = sessionmaker(self.async_engine, class_=AsyncSession, expire_on_commit=False)
 
    async def connect(self):
         self.db = self.async_session()

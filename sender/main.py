@@ -14,7 +14,7 @@ async def connect():
 async def disconnect():
     await database.disconnect()
 
-@app.post("/users/")
+@app.post("/create_users/")
 async def create_user(user_in : UserSchema) -> UserSchema:
     try:
         user = await database.create_user(user_in)
@@ -23,11 +23,11 @@ async def create_user(user_in : UserSchema) -> UserSchema:
         return error
 
 
-@app.get("/users/", response_model=list[UserSchema])
+@app.get("/users/")
 async def get_users():
     return await database.get_users()
 
-@app.get("/users/{user_id}", response_model=UserSchema)
+@app.get("/users/{user_id}")
 async def get_user(user_id: int):
     user = await database.get_user(user_id)
     if user:
@@ -52,3 +52,5 @@ async def delete_user(user_id: int):
         return HTTPException(status.HTTP_204_NO_CONTENT, detail="User deleted")
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="User not found")
+
+
