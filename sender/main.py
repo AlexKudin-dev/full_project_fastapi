@@ -1,10 +1,21 @@
-from fastapi import FastAPI, status, Response
-from database import database
+from fastapi import FastAPI, status
+from sqlalchemy.exc import SQLAlchemyError
+from connection import database
 from schemas import UserSchema
 from fastapi.exceptions import HTTPException
+from logger import logging
 
 # Создание экземпляра FastAPI
 app = FastAPI()
+
+
+# Логирование при каждом запросе
+@app.middleware("http")
+async def log_requests(request, call_next):
+    logging.info(f"Request: {request.method} {request.url}")
+    response = await call_next(request)
+    logging.info(f"Response: {response.status_code}")
+    return response
 
 @app.on_event("startup")
 async def connect():
@@ -19,15 +30,19 @@ async def create_user(user_in : UserSchema) -> UserSchema:
     try:
         user = await database.create_user(user_in)
         return user
-    except Exception as error:
-        return error
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=422,
+            detail="Не удалось создать user")
 
 
 @app.get("/users/")
 async def get_users():
     return await database.get_users()
 
-@app.get("/users/{user_id}")
+
+
+@app.get("/user/user_id")
 async def get_user(user_id: int):
     user = await database.get_user(user_id)
     if user:

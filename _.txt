@@ -1,0 +1,7 @@
+Alembic 
+
+1. alembic init 
+2. alembic revision --autogenerate -m "init"
+3. alembic upgrade head 
+4. alembic downgrade .... номер фиксации
+5. alembic upgrade .... номер фиксации
