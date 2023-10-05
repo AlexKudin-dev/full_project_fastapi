@@ -1,0 +1,26 @@
+version: "3.7"
+
+services:
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: service1
+    ports:
+      - 5433:5432
+    env_file:
+      - .env
+
+
+  web:
+    build:
+      context: .
+    container_name: fastapi_app
+    ports:
+      - 8080:8000
+    env_file:
+      - .env
+
