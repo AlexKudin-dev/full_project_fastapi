@@ -11,9 +11,16 @@ services:
       POSTGRES_DB: service1
     ports:
       - 5433:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./user_db.sql:/ ./user_db.sql
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "fastapi" ]
+      interval: 10s
+      retries: 5
+      timeout: 3s
     env_file:
       - .env
-
 
   web:
     build:
@@ -23,4 +30,38 @@ services:
       - 8080:8000
     env_file:
       - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  alembic:
+    build:
+      context: .
+    container_name: alembic_migrations_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: alembic upgrade head
+
+  tests:
+    build:
+     context: .
+    container_name: tests_db
+    depends_on:
+      - alembic
+    command: python -m unittest test_main.py
+
+
+volumes:
+  pgdata:
+
+
+
+
+
+
+
+
 

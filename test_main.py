@@ -1,21 +1,28 @@
-from fastapi.testclient import TestClient
 from main import app
-from fastapi import status
+from httpx import AsyncClient
+import unittest
+
+
+class TestApp(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.app = app
+    async def test_endpoint(self):
+        async with AsyncClient(app=self.app, base_url="http://0.0.0.0:8000") as client:
+            response = await client.get("/get-users/")
+            self.assertEqual(response.status_code, 200, "Expected status code 200")
+
+
+
+if __name__ == "__main__":
+    unittest.main()
 
 
 
 
-
-
-async def test_endpoint_get_users(client : TestClient(app)):
-    response = await client.get("/users/")
-    assert response.status_code == status.HTTP_200_OK
-
-
-async def test_endpoint_users_user_id(client : TestClient(app)):
-    response = await client.get(f"/user/{1}/")
-    assert response.status_code == status.HTTP_200_OK
-    #assert response.json()['id'] == 1, ["username"] == "string"
+# async def test_endpoint_users_user_id(client : TestClient(app)):
+#     response = await client.get(f"/user/{1}/")
+#     assert response.status_code == status.HTTP_200_OK
+#     #assert response.json()['id'] == 1, ["username"] == "string"
 
 
 

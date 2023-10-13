@@ -1,3 +1,6 @@
+import asyncio
+
+import uvicorn
 from fastapi import FastAPI, status
 from sqlalchemy.exc import SQLAlchemyError
 from connection import database
@@ -5,38 +8,27 @@ from schemas import UserSchema
 from fastapi.exceptions import HTTPException
 from logger import logging
 
-#from kafka_message import  producer
-
-
-
 
 # Создание экземпляра FastAPI
 app = FastAPI()
 
-# @app.get("/send/{message}")
-# async def send_message(message: str):
-#     producer.send('topic-name', value=message.encode('utf-8'))
-#     producer.flush()
-#     return {"message": "Message sent to Kafka"}
 
+#Логирование при каждом запросе
+@app.middleware("http")
+async def log_requests(request, call_next):
+    logging.info(f"Request: {request.method} {request.url}")
+    response = await call_next(request)
+    logging.info(f"Response: {response.status_code}")
+    return response
 
-
-# Логирование при каждом запросе
-# @app.middleware("http")
-# async def log_requests(request, call_next):
-#     logging.info(f"Request: {request.method} {request.url}")
-#     response = await call_next(request)
-#     logging.info(f"Response: {response.status_code}")
-#     return response
-
-@app.on_event("startup")
-async def connect():
-    await database.connect()
-
-
-@app.on_event("shutdown")
-async def disconnect():
-    await database.disconnect()
+# @app.on_event("startup")
+# async def connect():
+#     await database.connect()
+#
+#
+# @app.on_event("shutdown")
+# async def disconnect():
+#     await database.disconnect()
 
 @app.post("/post-create-users/")
 async def create_user(user_in: UserSchema) -> UserSchema:
@@ -56,10 +48,7 @@ async def get_users():
 
 @app.get("/get-users/")
 async def get_users():
-    return await database.get_users()
-
-
-
+      return await database.get_users()
 
 @app.get("/get-user/user_id")
 async def get_user(user_id: int):
@@ -68,6 +57,7 @@ async def get_user(user_id: int):
         return user
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="User not found")
+
 
 @app.patch("/patch-user/")
 async def update_user(user_in: UserSchema):
@@ -86,5 +76,10 @@ async def delete_user(user_id: int):
         return HTTPException(status.HTTP_204_NO_CONTENT, detail=f"User {existing_user.username} deleted")
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="User not found")
+
+
+
+if __name__ == "__main__":
+    asyncio.run(uvicorn.run(app, host='127.0.0.1', port=8000))
 
 
