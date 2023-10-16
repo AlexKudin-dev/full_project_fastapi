@@ -50,7 +50,8 @@ async def get_users():
 async def get_users():
       return await database.get_users()
 
-@app.get("/get-user/user_id")
+
+@app.get("/get-user/{user_id}")
 async def get_user(user_id: int):
     user = await database.get_user(user_id)
     if user:

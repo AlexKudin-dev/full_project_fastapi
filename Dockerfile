@@ -10,8 +10,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN chmod a+x command.sh
+RUN chmod a+x alembic.sh
+
+RUN chmod a+x app.sh
 
 RUN chmod a+x test_main.py
 
-CMD gunicorn main:app  --bind 0.0.0.0:8000 --worker-class uvicorn.workers.UvicornWorker
+
+
+
+
+
