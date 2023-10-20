@@ -1,6 +1,5 @@
 import asyncpg
 import asyncio
-from models import User
 from schemas import UserSchema
 from settings_ import SETTINGS
 
@@ -56,7 +55,7 @@ class Database():
                except asyncio.TimeoutError:
                    print("Timeout occurred while closing the connection pool.")
 
-   async def create_user(self, user_in: UserSchema) -> User:
+   async def create_user(self, user_in: UserSchema) -> UserSchema:
        async with asyncpg.create_pool(host=self.host,
                                       port=self.port,
                                       user=self.username,
@@ -67,11 +66,11 @@ class Database():
                                       timeout=5
                                       ) as pool:
            async with pool.acquire() as db:
-            result = await db.fetchrow(f"""
+            result = await db.fetchrow("""
             insert into users_test (id,username)
             values 
-            ({user_in.id},{user_in.username})""")
-            return dict(result)
+            ($1,$2) returning *""", user_in.id, user_in.username)
+            return  dict(result)
 
 
    async def update_user(self, user_id: int, username: str):
@@ -85,11 +84,11 @@ class Database():
                                       timeout=5
                                       ) as pool:
            async with pool.acquire() as db:
-               result = await db.fetchrow(f"""
+               result = await db.execute("""
                update users_test
-               set username = {username}
-               where id = {user_id} """)
-               return dict(result)
+               set username = $1
+               where id = $2""", username, user_id,)
+               return result
 
    async def delete_user(self, user_del_id: int):
        async with asyncpg.create_pool(host=self.host,
@@ -102,9 +101,9 @@ class Database():
                                       timeout=5
                                       ) as pool:
            async with pool.acquire() as db:
-               result = await db.fetchrow(f"""
-               delete from users_test where id = {user_del_id}""")
-               return dict(result)
+               result = await db.execute("""
+               delete from users_test where id = $1""", user_del_id)
+               return result
 
 
 # Создание экземпляра Database

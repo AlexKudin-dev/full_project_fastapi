@@ -1,5 +1,4 @@
 import asyncio
-
 import uvicorn
 from fastapi import FastAPI, status
 from sqlalchemy.exc import SQLAlchemyError
@@ -74,7 +73,7 @@ async def delete_user(user_id: int):
     existing_user = await database.get_user(user_id)
     if existing_user:
         await database.delete_user(user_del_id=user_id)
-        return HTTPException(status.HTTP_204_NO_CONTENT, detail=f"User {existing_user.username} deleted")
+        return HTTPException(status.HTTP_204_NO_CONTENT, detail=f"User {existing_user['username']} deleted")
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="User not found")
 
